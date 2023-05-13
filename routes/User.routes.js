@@ -15,7 +15,20 @@ userRouter.post("/register", async (req, res) => {
       res.status(400).send({ msg: "All fields are required" });
     } else {
       const ifAvailable = await UserModel.find({ email });
-     res.status(200).send(ifAvailable);
+    if (ifAvailable.length > 0) {
+        res.status(200).send({ msg: "Account already exists" });
+      } else {
+        bcrypt.hash(password, 4, async (err, hash) => {
+          const user = new UserModel({
+            name,
+            email,
+            password: hash,
+          });
+          await user.save();
+        });
+        res.status(200).send({ msg: "Registration successful" });
+      }
+    }
      
   } catch (err) {
     res.status(400).send({ msg: "Something went wrong, Try Again" });
